@@ -28,40 +28,70 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-
+    const userCollection = client.db("realEstateDB").collection("users");
     const propertyCollection = client.db("realEstateDB").collection("properties");
     const reviewCollection = client.db("realEstateDB").collection("reviews");
 
+    //user related api
+    app.get("/api/v1/users", async (req, res) => {
+      const users = await userCollection.find().toArray();
+      res.send(users);
+    });
 
+    app.get("/api/v1/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const users = await userCollection.findOne(query);
+      res.send(users);
+    });
+
+    app.post("/api/v1/users", async (req, res) => {
+      const query = { email: req.body.email };
+      console.log(55, req.body.email);
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        console.log(58, existingUser);
+        res.send({ message: "user already exists", insertedId: null });
+      } else {
+        const newUser = req.body;
+        const result = await userCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
+    app.put("/api/v1/users", async (req, res) => {
+      const query = { email: req.body.email };
+      const existingUser = await userCollection.findOne(query);
+      if (!existingUser) {
+        res.send({ message: "user does not exists", insertedId: null });
+      } else {
+        const result = await userCollection.updateOne(query, {
+          $set: req.body,
+        });
+        res.send(result);
+      }
+    });
+
+    app.delete("/api/v1/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //property related api
     app.get('/api/v1/properties', async(req, res) => {
       const result = await propertyCollection.find().toArray();
       res.send(result);
     })
     
+    //review related api
     app.get('/api/v1/reviews', async(req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     })
 
-    // carts collection
-    // app.get('/api/v1/cart', async(req, res) => {
-    //   const email = req.query.email;
-    //   const query = {email: email};
-    //   const result = await cartCollection.find(query).toArray();
-    //   res.send(result);
-    // })
-
-    // app.post('/api/v1/cart', async(req, res) => {
-    //   const result = await cartCollection.insertOne(req.body);
-    //   res.send(result);
-    // })
-
-    // app.delete('/api/v1/cart/:id', async(req, res) => {
-    //   const id = req.params.id;
-    //   const query = {_id: new ObjectId(id)};
-    //   const result = await cartCollection.deleteOne(query);
-    //   res.send(result);
-    // })
+  
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -78,9 +108,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('Restaurant management is running.....')
+  res.send('Real Estate Server is running.....')
 })
 
 app.listen(port, () => {
-  console.log(`Restaurant is running on port ${port}`)
+  console.log(`Real Estate Server is running on port ${port}`)
 })
