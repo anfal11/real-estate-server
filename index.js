@@ -30,7 +30,7 @@ async function run() {
 
     const userCollection = client.db("realEstateDB").collection("users");
     const propertyCollection = client.db("realEstateDB").collection("properties");
-    const reviewCollection = client.db("realEstateDB").collection("reviews");
+    const reviewCollection = client.db("realEstateDB").collection("review");
 
     //user related api
     app.get("/api/v1/users", async (req, res) => {
@@ -86,10 +86,17 @@ async function run() {
     })
     
     //review related api
-    app.get('/api/v1/reviews', async(req, res) => {
+    app.get('/api/v1/review', async(req, res) => {
       const result = await reviewCollection.find().toArray();
       res.send(result);
     })
+    app.post("/api/v1/review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection.insertOne(review);
+      res.send(result);
+    });
+    
+
 
   
 
