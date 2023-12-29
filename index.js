@@ -31,6 +31,7 @@ async function run() {
     const userCollection = client.db("realEstateDB").collection("users");
     const propertyCollection = client.db("realEstateDB").collection("properties");
     const reviewCollection = client.db("realEstateDB").collection("review");
+    const propertyReviewCollection = client.db("realEstateDB").collection("propertyReview");
 
     //user related api
     app.get("/api/v1/users", async (req, res) => {
@@ -40,9 +41,20 @@ async function run() {
 
     app.get("/api/v1/users/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const users = await userCollection.findOne(query);
-      res.send(users);
+if (!ObjectId.isValid(id)) {
+  res.status(400).send({ error: 'Invalid ObjectId format' });
+  return;
+}
+
+const query = { _id: new ObjectId(id) };
+const user = await userCollection.findOne(query);
+
+if (!user) {
+  res.status(404).send({ error: 'User not found' });
+} else {
+  res.send(user);
+}
+
     });
 
     app.post("/api/v1/users", async (req, res) => {
@@ -102,6 +114,7 @@ async function run() {
       res.send(result);
     });
     
+ 
 
 
   
