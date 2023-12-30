@@ -7,12 +7,12 @@ const jwt = require("jsonwebtoken");
 const port = process.env.PORT || 5000;
 
 //middleware
-app.use(cors(
-  {
-  origin: "http://localhost:5173", 
-  credentials: true,
-}
-));
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 //mongodb connection
@@ -42,14 +42,14 @@ async function run() {
       .db("realEstateDB")
       .collection("propertyReview");
 
-   //jwt related api
-   app.post("/jwt", async (req, res) => {
-    const user = req.body;
-    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "1h",
+    //jwt related api
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res.send({ token: token });
     });
-    res.send({ token: token });
-  });
 
     // Middleware to verify JWT token
     const verifyToken = (req, res, next) => {
@@ -69,7 +69,7 @@ async function run() {
       }
     };
 
-      // Middleware to verify admin access
+    // Middleware to verify admin access
     const verifyAdmin = async (req, res, next) => {
       try {
         if (!req.user || !req.user.email) {
@@ -172,7 +172,6 @@ async function run() {
       res.send(result);
     });
 
-
     // admin related api
     app.get("/users/admin/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
@@ -205,7 +204,7 @@ async function run() {
       async (req, res) => {
         const id = req.params.id;
         const filter = { _id: new ObjectId(id) };
-        const updatedDoc = { $set: { role: "admin", role: "agent"} };
+        const updatedDoc = { $set: { role: "admin", role: "agent" } };
         const result = await userCollection.updateOne(filter, updatedDoc);
         res.send(result);
       }
