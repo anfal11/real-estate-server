@@ -176,7 +176,15 @@ async function run() {
       }
     });
 
-
+    app.put("/api/v1/properties/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const updatedProperty = req.body;
+      const newValues = { $set: updatedProperty };
+      const result = await propertyCollection.updateOne(query, newValues);
+      res.send(result);
+    });
+    
     //review related api
     app.get("/api/v1/review", async (req, res) => {
       const result = await reviewCollection.find().toArray();
