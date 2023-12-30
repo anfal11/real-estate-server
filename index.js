@@ -34,13 +34,10 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("realEstateDB").collection("users");
-    const propertyCollection = client
-      .db("realEstateDB")
-      .collection("properties");
+    const propertyCollection = client.db("realEstateDB").collection("properties");
     const reviewCollection = client.db("realEstateDB").collection("review");
-    const propertyReviewCollection = client
-      .db("realEstateDB")
-      .collection("propertyReview");
+    const propertyReviewCollection = client.db("realEstateDB").collection("propertyReview");
+    const wishlistCollection = client.db("realEstateDB").collection("wishlist");
 
     //jwt related api
     app.post("/jwt", async (req, res) => {
@@ -171,6 +168,24 @@ async function run() {
       const result = await reviewCollection.insertOne(review);
       res.send(result);
     });
+
+    app.get("/api/v1/wishlist", async (req, res) => {
+        const wishlist = await wishlistCollection.find().toArray();
+        res.send(wishlist);
+    })
+
+    app.post("/api/v1/wishlist", async (req, res) => {
+        const wishlist = req.body;
+        const result = await wishlistCollection.insertOne(wishlist);
+        res.send(result);
+    })
+
+    app.delete("/api/v1/wishlist/:id", async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: id };
+        const result = await wishlistCollection.deleteOne(query);
+        res.send(result);
+    })
 
     // admin related api
     app.get("/users/admin/:email", verifyToken, async (req, res) => {
