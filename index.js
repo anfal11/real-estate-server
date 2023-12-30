@@ -252,6 +252,59 @@ async function run() {
       res.send({ admin });
     });
 
+    // agent related api
+    app.get("/users/agent/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+
+      if (email !== req.user.email) {
+        return res.status(403).send({ message: "Unauthorized request" });
+      }
+
+      try {
+        const query = { email };
+        const user = await userCollection.findOne(query);
+
+        if (!user) {
+          return res.status(404).send({ message: "User not found" });
+        }
+
+        const isAgent = user.role === "agent";
+
+        res.send({ agent: isAgent });
+      } catch (error) {
+        console.error(error);
+        return res.status(500).send({ message: "Internal server error" });
+      }
+    });
+
+    app.patch(
+      "/users/admin/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updatedDoc = { $set: { role: "admin", role: "agent" } };
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      }
+    );
+
+    app.get("/users/admin/:email", verifyAdmin, async (req, res) => {
+      console.log(215, req.params, req?.decoded?.email);
+      const email = req?.params?.email;
+      if (email !== req?.user?.email) {
+        return res.status(403).send({ message: "Unauthorized request" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let admin = false;
+      if (user) {
+        admin = user?.role === "admin";
+      }
+      res.send({ admin });
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
