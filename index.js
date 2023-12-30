@@ -158,6 +158,13 @@ async function run() {
       res.send(property);
     });
 
+    app.post("/api/v1/properties", async (req, res)=>{
+      const property = req.body;
+      const result = await propertyCollection.insertOne(property);
+      res.send(result);
+    });
+
+
     //review related api
     app.get("/api/v1/review", async (req, res) => {
       const result = await reviewCollection.find().toArray();
