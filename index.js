@@ -164,6 +164,18 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/api/v1/properties/:id", async (req, res) => {
+      const id = req.params.id; 
+      const query = { _id: new ObjectId(id) };
+      try {
+        const result = await propertyCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
 
     //review related api
     app.get("/api/v1/review", async (req, res) => {
