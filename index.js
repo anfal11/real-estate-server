@@ -141,9 +141,29 @@ async function run() {
     app.delete("/api/v1/users/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
-      const result = await userCollection.deleteOne(query);
-      res.send(result);
+      try {
+        const result = await userCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting user:", error);
+        res.status(500).send("Internal Server Error");
+      }
     });
+
+    app.get("/api/v1/users", async (req, res) => {
+      const page = req.query.page || 1;
+      const limit = 8;
+      const skip = (page - 1) * limit;
+    
+      try {
+        const users = await userCollection.find().skip(skip).limit(limit).toArray();
+        res.send(users);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    
 
     //property related api
     app.get("/api/v1/properties", async (req, res) => {
@@ -184,7 +204,7 @@ async function run() {
       const result = await propertyCollection.updateOne(query, newValues);
       res.send(result);
     });
-    
+
     //review related api
     app.get("/api/v1/review", async (req, res) => {
       const result = await reviewCollection.find().toArray();
@@ -304,19 +324,64 @@ async function run() {
       }
     });
 
-    app.patch(
-      "/users/admin/:id",
-      verifyToken,
-      verifyAdmin,
-      async (req, res) => {
-        const id = req.params.id;
-        const filter = { _id: new ObjectId(id) };
-        const updatedDoc = { $set: { role: "admin", role: "agent" } };
+    // app.patch(
+    //   "/users/admin/:id",
+    //   verifyToken,
+    //   verifyAdmin,
+    //   async (req, res) => {
+    //     const id = req.params.id;
+    //     const filter = { _id: new ObjectId(id) };
+    //     const updatedDoc = { $set: { role: "admin", role: "agent" } };
+    //     const result = await userCollection.updateOne(filter, updatedDoc);
+    //     res.send(result);
+    //   }
+    // );
+
+    app.patch("/api/v1/users/make-admin/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const userId = req.params.id;
+      const filter = { _id: new ObjectId(userId) };
+      const updatedDoc = { $set: { role: "admin" } };
+    
+      try {
         const result = await userCollection.updateOne(filter, updatedDoc);
         res.send(result);
+      } catch (error) {
+        console.error("Error making user admin:", error);
+        res.status(500).send("Internal Server Error");
       }
-    );
+    });
 
+    app.patch("/api/v1/users/make-agent/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const userId = req.params.id;
+      const filter = { _id: new ObjectId(userId) };
+      const updatedDoc = { $set: { role: "agent" } };
+    
+      try {
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        console.error("Error making user agent:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+
+    app.patch("/api/v1/users/mark-fraud/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const userId = req.params.id;
+      const filter = { _id: new ObjectId(userId), role: "agent" };
+      const updatedDoc = { $set: { role: "fraud" } };
+    
+      try {
+        // Add logic to remove the agent's properties and advertisements from the system
+        // ...
+    
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      } catch (error) {
+        console.error("Error marking user as fraud:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    });
+    
     app.get("/users/admin/:email", verifyAdmin, async (req, res) => {
       console.log(215, req.params, req?.decoded?.email);
       const email = req?.params?.email;
