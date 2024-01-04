@@ -271,18 +271,18 @@ async function run() {
       }
     });
 
-    app.patch(
-      "/users/admin/:id",
-      verifyToken,
-      verifyAdmin,
-      async (req, res) => {
-        const id = req.params.id;
-        const filter = { _id: new ObjectId(id) };
-        const updatedDoc = { $set: { role: "admin", role: "agent" } };
-        const result = await userCollection.updateOne(filter, updatedDoc);
-        res.send(result);
-      }
-    );
+    // app.patch(
+    //   "/users/admin/:id",
+    //   verifyToken,
+    //   verifyAdmin,
+    //   async (req, res) => {
+    //     const id = req.params.id;
+    //     const filter = { _id: new ObjectId(id) };
+    //     const updatedDoc = { $set: { role: "admin", role: "agent" } };
+    //     const result = await userCollection.updateOne(filter, updatedDoc);
+    //     res.send(result);
+    //   }
+    // );
 
     app.get("/users/admin/:email", verifyAdmin, async (req, res) => {
       console.log(215, req.params, req?.decoded?.email);
@@ -353,6 +353,7 @@ async function run() {
 
     app.patch("/api/v1/users/make-agent/:id", verifyToken, verifyAdmin, async (req, res) => {
       const userId = req.params.id;
+      console.log(356, userId);
       const filter = { _id: new ObjectId(userId) };
       const updatedDoc = { $set: { role: "agent" } };
     
@@ -368,6 +369,11 @@ async function run() {
     app.patch("/api/v1/users/mark-fraud/:id", verifyToken, verifyAdmin, async (req, res) => {
       const userId = req.params.id;
       const filter = { _id: new ObjectId(userId), role: "agent" };
+      const user = await userCollection.findOne({ _id: new ObjectId(userId) });
+if (!user) {
+  return res.status(404).send({ error: "User not found" });
+}
+
       const updatedDoc = { $set: { role: "fraud" } };
     
       try {
