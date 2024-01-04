@@ -378,7 +378,7 @@ if (!user) {
     
       try {
         // Add logic to remove the agent's properties and advertisements from the system
-        // ...
+      
     
         const result = await userCollection.updateOne(filter, updatedDoc);
         res.send(result);
