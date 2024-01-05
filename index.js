@@ -301,7 +301,7 @@ async function run() {
     // );
 
     app.get("/users/admin/:email", verifyAdmin, async (req, res) => {
-      console.log(215, req.params, req?.decoded?.email);
+      console.log(304, req.params, req?.decoded?.email);
       const email = req?.params?.email;
       if (email !== req?.user?.email) {
         return res.status(403).send({ message: "Unauthorized request" });
