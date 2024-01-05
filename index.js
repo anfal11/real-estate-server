@@ -518,6 +518,38 @@ app.post("/api/v1/make-offer", verifyToken, async (req, res) => {
     res.send(result);
 })
 
+// Backend API for accepting an offer
+app.put("/api/v1/offer/:id/accept", verifyToken, async (req, res) => {
+  const offerId = req.params.id;
+
+  try {
+    const filter = { _id: new ObjectId(offerId) };
+    const updatedDoc = { $set: { status: 'accepted' } };
+
+    const result = await offerCollection.updateOne(filter, updatedDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Error accepting offer:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Backend API for rejecting an offer
+app.put("/api/v1/offer/:id/reject", verifyToken, async (req, res) => {
+  const offerId = req.params.id;
+
+  try {
+    const filter = { _id: new ObjectId(offerId) };
+    const updatedDoc = { $set: { status: 'rejected' } };
+
+    const result = await offerCollection.updateOne(filter, updatedDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Error rejecting offer:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 
     // Send a ping to confirm a successful connection
