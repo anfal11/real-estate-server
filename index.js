@@ -167,6 +167,10 @@ async function run() {
 
     //property related api
     app.get("/api/v1/properties", async (req, res) => {
+      const result = await propertyCollection.find({ verified: true }).toArray();
+      res.send(result);
+    });
+    app.get("/api/v1/admin/properties", async (req, res) => {
       const result = await propertyCollection.find().toArray();
       res.send(result);
     });
@@ -179,7 +183,18 @@ async function run() {
     });
 
     app.post("/api/v1/properties", async (req, res)=>{
-      const property = req.body;
+      const property = {
+        title: req.body.title,
+        location: req.body.location,
+        image: req.body.image,
+        agentName: req.body.agentName,
+        agentEmail: req.body.agentEmail,
+        description: req.body.description,
+        status: req.body.status,
+        type: req.body.type,
+        price: req.body.price,
+        verified: false,
+      }
       const result = await propertyCollection.insertOne(property);
       res.send(result);
     });
@@ -402,6 +417,41 @@ if (!user) {
       }
       res.send({ admin });
     });
+
+    // Add these routes to your existing backend code
+
+// Verify property
+app.patch("/api/v1/properties/verify/:id", verifyAdmin, async (req, res) => {
+  const propertyId = req.params.id;
+
+  try {
+    const filter = { _id: new ObjectId(propertyId) };
+    const updatedDoc = { $set: { verified: true } };
+
+    const result = await propertyCollection.updateOne(filter, updatedDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Error verifying property:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Reject property
+app.patch("/api/v1/properties/reject/:id", verifyAdmin, async (req, res) => {
+  const propertyId = req.params.id;
+
+  try {
+    const filter = { _id: new ObjectId(propertyId) };
+    const updatedDoc = { $set: { verified: false } };
+
+    const result = await propertyCollection.updateOne(filter, updatedDoc);
+    res.send(result);
+  } catch (error) {
+    console.error("Error rejecting property:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
