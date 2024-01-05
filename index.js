@@ -187,6 +187,7 @@ async function run() {
         title: req.body.title,
         location: req.body.location,
         image: req.body.image,
+        nid: req.body.imageNID,
         agentName: req.body.agentName,
         agentEmail: req.body.agentEmail,
         description: req.body.description,
