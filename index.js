@@ -508,6 +508,7 @@ app.post("/api/v1/make-offer", verifyToken, async (req, res) => {
     buyerName: req.body.buyerName, 
     propertyName: req.body.propertyName,
     propertyLocation: req.body.propertyLocation,
+    agentEmail: req.body.agentEmail,
     offeredAmount: parseFloat(req.body.offeredAmount),
     buyerEmail: req.user.email,
     status: "pending",
