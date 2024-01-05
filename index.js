@@ -421,7 +421,7 @@ if (!user) {
     // Add these routes to your existing backend code
 
 // Verify property
-app.patch("/api/v1/properties/verify/:id", verifyAdmin, async (req, res) => {
+app.patch("/api/v1/properties/verify/:id", verifyToken, verifyAdmin, async (req, res) => {
   const propertyId = req.params.id;
 
   try {
@@ -437,7 +437,7 @@ app.patch("/api/v1/properties/verify/:id", verifyAdmin, async (req, res) => {
 });
 
 // Reject property
-app.patch("/api/v1/properties/reject/:id", verifyAdmin, async (req, res) => {
+app.patch("/api/v1/properties/reject/:id", verifyToken,  async (req, res) => {
   const propertyId = req.params.id;
 
   try {
