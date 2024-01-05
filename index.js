@@ -246,6 +246,8 @@ async function run() {
         title: req.body.title,
         location: req.body.location,
         price: req.body.price,
+        agentName: req.body.agentName,
+        agentEmail: req.body.agentEmail,
         status: req.body.status,
         type: req.body.type,
         description: req.body.description,
@@ -457,6 +459,11 @@ app.patch("/api/v1/properties/reject/:id", verifyToken,  async (req, res) => {
 
 
 // Make an offer on a property
+app.get("/api/v1/offer", async (req, res) => {
+  const result = await offerCollection.find().toArray();
+  res.send(result);
+});
+
 // app.post("/api/v1/make-offer", verifyToken, async (req, res) => {
 //   try {
 //     const { propertyId, offeredAmount } = req.body;
@@ -498,6 +505,9 @@ app.patch("/api/v1/properties/reject/:id", verifyToken,  async (req, res) => {
 app.post("/api/v1/make-offer", verifyToken, async (req, res) => {
   const property = {
     propertyId: req.body.propertyId, 
+    buyerName: req.body.buyerName, 
+    propertyName: req.body.propertyName,
+    propertyLocation: req.body.propertyLocation,
     offeredAmount: parseFloat(req.body.offeredAmount),
     buyerEmail: req.user.email,
     status: "pending",
