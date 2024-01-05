@@ -36,8 +36,8 @@ async function run() {
     const userCollection = client.db("realEstateDB").collection("users");
     const propertyCollection = client.db("realEstateDB").collection("properties");
     const reviewCollection = client.db("realEstateDB").collection("review");
-    const propertyReviewCollection = client.db("realEstateDB").collection("propertyReview");
     const wishlistCollection = client.db("realEstateDB").collection("wishlist");
+    const offerCollection = client.db("realEstateDB").collection("offers");
 
     //jwt related api
     app.post("/jwt", async (req, res) => {
@@ -53,6 +53,7 @@ async function run() {
       try {
         const authorizationHeader = req.headers.authorization;
         if (!authorizationHeader || typeof authorizationHeader !== "string") {
+          console.log("56: Token being verified:",authorizationHeader);
           return res.status(401).send({ message: "Unauthorized request" });
         }
         const token = authorizationHeader.split(" ")[1];
@@ -452,6 +453,60 @@ app.patch("/api/v1/properties/reject/:id", verifyToken,  async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 });
+
+
+
+// Make an offer on a property
+// app.post("/api/v1/make-offer", verifyToken, async (req, res) => {
+//   try {
+//     const { propertyId, offeredAmount } = req.body;
+//     console.log('Received propertyId:', propertyId);
+    
+//     const property = await propertyCollection.findOne({
+//       _id: new ObjectId(propertyId),
+//     });
+    
+//     console.log('Found property:', property);
+
+//     if (!property) {
+//       console.error(`Property not found for ID: ${propertyId}`);
+//       return res.status(404).send({ error: "Property not found" });
+//     }
+
+//     const { price } = property;
+
+//     if (offeredAmount < price.min || offeredAmount > price.max) {
+//       return res.status(400).send({ error: "Invalid offer amount" });
+//     }
+
+//     const offer = {
+//       propertyId: new ObjectId(propertyId),
+//       buyerEmail: req.user.email,
+//       offeredAmount,
+//       status: "pending",
+//       buyingDate: new Date(),
+//     };
+
+//     const result = await offerCollection.insertOne(offer);
+
+//     res.send(result);
+//   } catch (error) {
+//     console.error("Error making an offer:", error);
+//     res.status(500).send("Internal Server Error");
+//   }
+// });
+app.post("/api/v1/make-offer", verifyToken, async (req, res) => {
+  const property = {
+    propertyId: req.body.propertyId, 
+    offeredAmount: parseFloat(req.body.offeredAmount),
+    buyerEmail: req.user.email,
+    status: "pending",
+    buyingDate: new Date(),
+  };
+    const result = await offerCollection.insertOne(property);
+    res.send(result);
+})
+
 
 
     // Send a ping to confirm a successful connection
