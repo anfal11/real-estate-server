@@ -44,6 +44,7 @@ async function run() {
     const reviewCollection = client.db("realEstateDB").collection("review");
     const wishlistCollection = client.db("realEstateDB").collection("wishlist");
     const offerCollection = client.db("realEstateDB").collection("offers");
+    const paymentCollection = client.db("realEstateDB").collection("payment");
 
     //jwt related api
     app.post("/jwt", async (req, res) => {
@@ -117,9 +118,9 @@ async function run() {
           total_amount: property.price || 0, // Set total_amount dynamically based on property price
           currency: 'BDT',
           tran_id: tran_id, // use unique tran_id for each api call
-          success_url: 'http://localhost:5000/success',
-          fail_url: 'http://localhost:5000/fail',
-          cancel_url: 'http://localhost:5000/cancel',
+          success_url: `http://localhost:5000/payment/success/${tran_id}`,
+          fail_url: `http://localhost:5000/payment/fail/${tran_id}`,
+          cancel_url: `http://localhost:5000/payment/cancel/${tran_id}`,
           ipn_url: 'http://localhost:5000/ipn',
           shipping_method: 'Courier',
           product_name: property.title,
@@ -151,9 +152,50 @@ async function run() {
       sslcz.init(data).then(apiResponse => {
           // Redirect the user to the payment gateway
           let GatewayPageURL = apiResponse.GatewayPageURL
-          res.redirect(GatewayPageURL)
+          res.send({url: GatewayPageURL})
+
+    // Save user details to the database
+    const userDetails = {
+      name: pay.name,
+      email: pay.email,
+      address: pay.address,
+    };
+          const finalOrder = {
+            property, paidStatus: false, transactionId: tran_id, userDetails: userDetails,
+          }
+          const result = paymentCollection.insertOne(finalOrder);
           console.log('Redirecting to: ', GatewayPageURL)
       });
+
+
+app.post('/payment/success/:tranId', async (req, res) => {
+  console.log('Payment success:', req.params.tranId);
+  const result = await paymentCollection.updateOne(
+    { transactionId: req.params.tranId }, 
+    { $set: 
+      { 
+        paidStatus: true, 
+        successDate: new Date(), 
+      } 
+    });
+  if (result.modifiedCount > 0) {
+      res.redirect(`http://localhost:5173/payment/success/${req.params.tranId}`);
+  } else {
+      res.send('Payment failed');
+  }
+})
+app.post('/payment/fail/:tranId', async (req, res) => {
+  const result = await paymentCollection.deleteOne({ transactionId: req.params.tranId });
+
+  if (result.deletedCount) {
+      res.redirect(`http://localhost:5173/payment/fail/${req.params.tranId}`);
+  } else {
+      res.send('Payment failed');
+  }
+})
+
+
+
   });
   
     //user related api
