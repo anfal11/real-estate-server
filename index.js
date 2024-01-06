@@ -99,11 +99,10 @@ async function run() {
 
     const tran_id = new ObjectId().toString();
     //payment
-    app.get('/payment', async (req, res) => {
+    app.get("/payment", async (req, res) => {
       const payment = await paymentCollection.find().toArray();
       res.send(payment);
-    })
-
+    });
 
     app.post("/payment", async (req, res) => {
       // Assuming req.body contains the necessary information, including the property price
@@ -358,6 +357,12 @@ async function run() {
       res.send(result);
     });
 
+    app.delete("/api/v1/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reviewCollection.deleteOne(query);
+      res.send(result);
+    });
     app.get("/api/v1/wishlist", async (req, res) => {
       const wishlist = await wishlistCollection.find().toArray();
       res.send(wishlist);
