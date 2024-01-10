@@ -611,6 +611,18 @@ async function run() {
       }
     );
 
+    app.delete("/api/v1/properties/reject/:id", async (req, res) =>{
+      const propertyId = req.params.id;
+      const query = { _id: new ObjectId(propertyId) };
+      try {
+        const result = await propertyCollection.deleteOne(query);
+        res.send(result);
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        res.status(500).send("Internal Server Error");
+      }
+    })
+
     // Make an offer on a property
     app.get("/api/v1/offer", async (req, res) => {
       const result = await offerCollection.find().toArray();
