@@ -315,6 +315,7 @@ async function run() {
         nid: req.body.imageNID,
         agentName: req.body.agentName,
         agentEmail: req.body.agentEmail,
+        agentNumber: req.body.agentNumber,
         description: req.body.description,
         status: req.body.status,
         type: req.body.type,
