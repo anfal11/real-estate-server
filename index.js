@@ -171,7 +171,7 @@ async function run() {
           userDetails: userDetails,
         };
         const result = paymentCollection.insertOne(finalOrder);
-        console.log("Redirecting to: ", GatewayPageURL);
+        console.log("Redirecting to: ", GatewayPageURL); 
       });
 
       app.post("/payment/success/:tranId", async (req, res) => {
