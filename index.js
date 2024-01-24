@@ -9,11 +9,14 @@ const port = process.env.PORT || 5000;
 
 //middleware
 app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
+  cors(
+  //   {
+  //   origin: ["http://localhost:5173", "https://real-estate-client-phi.vercel.app/"],
+  //   credentials: true,
+  // }
+  )
 );
+
 app.use(express.json());
 
 //mongodb connection
@@ -122,10 +125,10 @@ async function run() {
         total_amount: property.price || 0, // Set total_amount dynamically based on property price
         currency: "BDT",
         tran_id: tran_id, // use unique tran_id for each api call
-        success_url: `http://localhost:5000/payment/success/${tran_id}`,
-        fail_url: `http://localhost:5000/payment/fail/${tran_id}`,
-        cancel_url: `http://localhost:5000/payment/cancel/${tran_id}`,
-        ipn_url: "http://localhost:5000/ipn",
+        success_url: `https://real-estate-server-xi.vercel.app/payment/success/${tran_id}`,
+        fail_url: `https://real-estate-server-xi.vercel.app/payment/fail/${tran_id}`,
+        cancel_url: `https://real-estate-server-xi.vercel.app/payment/cancel/${tran_id}`,
+        ipn_url: "https://real-estate-server-xi.vercel.app/ipn",
         shipping_method: "Courier",
         product_name: property.title,
         product_category: "Electronic",
@@ -187,7 +190,7 @@ async function run() {
         );
         if (result.modifiedCount > 0) {
           res.redirect(
-            `http://localhost:5173/payment/success/${req.params.tranId}`
+            `https://real-estate-client-phi.vercel.app/payment/success/${req.params.tranId}`
           );
         } else {
           res.send("Payment failed");
@@ -200,7 +203,7 @@ async function run() {
 
         if (result.deletedCount) {
           res.redirect(
-            `http://localhost:5173/payment/fail/${req.params.tranId}`
+            `https://real-estate-client-phi.vercel.app/payment/fail/${req.params.tranId}`
           );
         } else {
           res.send("Payment failed");
